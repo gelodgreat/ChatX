@@ -18,6 +18,7 @@ import android.text.format.DateFormat;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
-
         return true;
     }
 
@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         }
+
     }
 
     @Override
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 EditText input = (EditText) findViewById(R.id.input);
-                FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(input.getText().toString(), FirebaseAuth.getInstance().getCurrentUser().getEmail()));
+                FirebaseDatabase.getInstance().getReference().push().setValue(new ChatMessage(input.getText().toString(), FirebaseAuth.getInstance().getCurrentUser().getDisplayName()));
                 input.setText("");
             }
         });
@@ -86,14 +87,13 @@ public class MainActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().build(), SIGN_IN_REQUEST_CODE);
         } else {
-            Snackbar.make(activity_main, "Welcome " + FirebaseAuth.getInstance().getCurrentUser().getEmail(), Snackbar.LENGTH_SHORT).show();
-
+            Snackbar.make(activity_main, "Welcome " + FirebaseAuth.getInstance().getCurrentUser().getDisplayName(), Snackbar.LENGTH_SHORT).show();
         }
         displayChatMessage();
     }
 
     private void displayChatMessage() {
-        ListView listOfMEssage = (ListView) findViewById(R.id.list_of_message);
+        ListView listOfMessage = (ListView) findViewById(R.id.list_of_message);
         adapter = new FirebaseListAdapter<ChatMessage>(this, ChatMessage.class, R.layout.list_item, FirebaseDatabase.getInstance().getReference()) {
             @Override
             protected void populateView(View v, ChatMessage model, int position) {
@@ -101,9 +101,9 @@ public class MainActivity extends AppCompatActivity {
 
                 TextView messageText, messageUser, messageTime;
 
-                messageText = (TextView) findViewById(R.id.message_text);
-                messageUser = (TextView) findViewById(R.id.message_user);
-                messageTime = (TextView) findViewById(R.id.message_time);
+                messageText = (TextView) v.findViewById(R.id.message_text);
+                messageUser = (TextView) v.findViewById(R.id.message_user);
+                messageTime = (TextView) v.findViewById(R.id.message_time);
 
                 messageText.setText(model.getMessageText());
                 messageUser.setText(model.getMessageUser());
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        listOfMEssage.setAdapter(adapter);
+        listOfMessage.setAdapter(adapter);
 
     }
 }
